@@ -2,9 +2,12 @@ package com.lock;
 
 import com.lock.etcd.EtcdLock;
 import com.lock.redis.RedisUtil;
+import com.lock.redis.RedissonUtil;
 import com.lock.zk.CuratorLock;
 import com.lock.zk.ZooLock;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -104,6 +107,64 @@ class DistributionLockApplicationTests {
                 e.printStackTrace();
             }
             boolean unlockRes = curatorLock.unlock();
+            System.out.println(Thread.currentThread().getName() + "解锁:" + unlockRes);
+        }
+    }
+
+    @Test
+    public void redissonLock() {
+        for (int i = 0; i < 10; i++) {
+            new MyRedissonThread1().start();
+        }
+        try {
+            Thread.sleep(1000000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void redissonTryLock() {
+        for (int i = 0; i < 10; i++) {
+            new MyRedissonThread2().start();
+        }
+        try {
+            Thread.sleep(1000000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static class MyRedissonThread1 extends Thread {
+        @Override
+        public void run() {
+            RedissonClient redissonClient = RedissonUtil.getRedissonClient();
+            RLock rLock = redissonClient.getLock("myLock");
+            boolean lockRes = RedissonUtil.lock(rLock, 10L);
+            System.out.println(Thread.currentThread().getName() + "加锁:" + lockRes);
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            boolean unlockRes = RedissonUtil.unLock(rLock);
+            System.out.println(Thread.currentThread().getName() + "解锁:" + unlockRes);
+        }
+    }
+
+    public static class MyRedissonThread2 extends Thread {
+        @Override
+        public void run() {
+            RedissonClient redissonClient = RedissonUtil.getRedissonClient();
+            RLock rLock = redissonClient.getLock("myLock");
+            try {
+                boolean lockRes = RedissonUtil.tryLock(rLock, 10L, 10L);
+                System.out.println(Thread.currentThread().getName() + "加锁:" + lockRes);
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            boolean unlockRes = RedissonUtil.unLock(rLock);
             System.out.println(Thread.currentThread().getName() + "解锁:" + unlockRes);
         }
     }

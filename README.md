@@ -21,12 +21,18 @@
 
 ## redis
 
-    加锁setNx()实现，解锁lua脚本实现
-
  [redis分布式锁](https://github.com/Xun-Zhou/distribution-lock/blob/master/src/main/java/com/lock/redis/RedisUtil.java "redis分布式锁")
+ 
+ redis推荐使用Redisson客户端
+ 
+ ![Redisson分布式锁示意图](https://github.com/Xun-Zhou/distribution-lock/blob/master/redission.jpg "Redisson分布式锁示意图")
+ 
+ [Redisson分布式锁](https://github.com/Xun-Zhou/distribution-lock/blob/master/src/main/java/com/lock/redis/RedissonUtil.java "redis分布式锁")
 
 ## zookeeper
 
  [自实现分布式锁](https://github.com/Xun-Zhou/distribution-lock/blob/master/src/main/java/com/lock/zk/ZooLock.java "自实现分布式锁")
+ 
+ Curator客户端实现分布式锁，简化开发
  
  [Curator客户端](https://github.com/Xun-Zhou/distribution-lock/blob/master/src/main/java/com/lock/zk/CuratorLock.java "CuratorL客户端")
